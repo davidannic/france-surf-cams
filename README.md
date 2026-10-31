@@ -6,12 +6,14 @@ Sources : [Viewsurf](https://www.viewsurf.com/univers/surf) (rubriques surf et p
 
 ## Utilisation
 
-En ligne : le site est hébergé sur Cloudflare Pages et protégé par Cloudflare Access (connexion par code envoyé par e-mail, réservée aux adresses autorisées). En local : double-clic sur `index.html`.
+En ligne : https://france-surf-cams.pages.dev, protégé par mot de passe. En local : double-clic sur `index.html` (pas de mot de passe en local).
 
 ### Hébergement
 
 - **Cloudflare Pages**, relié à ce dépôt GitHub (privé) : chaque push sur `main` republie le site. Réglages : aucune commande de build, dossier de sortie `/`.
-- **Cloudflare Access** (Zero Trust, offre gratuite) : une application « self-hosted » sur le domaine `*.pages.dev` du projet, avec une règle *Allow* qui liste les e-mails autorisés. Pour ajouter un ami : Zero Trust → Access → Applications → l'application → Policies → ajouter son adresse.
+- **Mot de passe** : `functions/_middleware.js` bloque tout le site tant qu'on n'a pas saisi le mot de passe, puis garde la connexion 30 jours (cookie). Le mot de passe est le secret `SITE_PASSWORD` du projet Pages : Settings → Variables and Secrets. Sans ce secret, le site affiche « mot de passe non configuré ».
+- **Changer le mot de passe** (par exemple pour retirer l'accès à quelqu'un) : modifie `SITE_PASSWORD`, puis Deployments → dernier déploiement → *Retry deployment*. Tout le monde est déconnecté et doit saisir le nouveau.
+- Le lien « Se déconnecter » en bas de page supprime la connexion sur l'appareil.
 
 - **Zones** : les pastilles en haut. La dernière zone choisie est mémorisée.
 - **Recherche** : tape un spot (« hossegor », « lacanau »…), les accents sont ignorés.
