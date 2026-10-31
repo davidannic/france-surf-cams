@@ -266,6 +266,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 16px max(
     f.allow = "autoplay; fullscreen; picture-in-picture";
     f.setAttribute("allowfullscreen", "");
     f.setAttribute("scrolling", "no");
+    // The Viewsurf (joada) player answers 403 when the request names another site as its referrer.
+    if (!c.cam.pv) f.referrerPolicy = "no-referrer";
     f.addEventListener("load", function () { if (el.dataset.state === "loading") el.dataset.state = "playing"; });
     c.media.insertBefore(f, c.media.firstChild);
   }
