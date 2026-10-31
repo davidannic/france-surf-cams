@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b14">
+<title>France Surf Cams</title>
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Surf Cams">
+<style>
+:root{
+  --bg:#070b14; --panel:#0e1524; --card:#0b1220; --line:#1c2638; --line-2:#2a3850;
+  --text:#e7edf7; --muted:#8392aa; --accent:#38bdf8; --accent-ink:#04121d; --live:#ef4444; --fav:#facc15;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{position:sticky;top:0;z-index:10;background:rgba(7,11,20,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+  padding:max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{margin-right:auto;min-width:0}
+.brand h1{margin:0;font-size:20px;color:var(--accent);letter-spacing:.2px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:8px;flex:1 1 360px;justify-content:flex-end;min-width:0}
+#q{flex:1 1 200px;min-width:0;max-width:280px;background:var(--panel);border:1px solid var(--line-2);border-radius:10px;
+  padding:8px 12px;outline:none}
+#q:focus{border-color:var(--accent)}
+.btn{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+
+nav{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:thin}
+.pill{flex:none;background:var(--panel);border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;cursor:pointer}
+.pill:hover{border-color:var(--accent)}
+.pill.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.pill small{opacity:.65;margin-left:4px}
+#count{color:var(--muted);font-size:12px;margin-top:4px}
+
+main{padding:12px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left))}
+#grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.media{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer}
+.media iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  color:var(--muted);font-size:13px;text-align:center;padding:12px;
+  background:radial-gradient(ellipse at center,#0f1a2e 0%,#05080f 75%)}
+.play{width:48px;height:48px;border-radius:50%;border:2px solid var(--accent);display:grid;place-items:center;
+  background:rgba(56,189,248,.12);transition:transform .15s}
+.media:hover .play{transform:scale(1.08)}
+.play svg{width:20px;height:20px;fill:var(--accent);margin-left:3px}
+.ov .ico{font-size:26px;line-height:1}
+.spin{width:30px;height:30px;border:3px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.card[data-state="playing"] .ov{display:none}
+
+.badge{position:absolute;left:8px;top:8px;z-index:2;font-size:10px;font-weight:700;letter-spacing:.6px;
+  background:rgba(0,0,0,.6);border-radius:6px;padding:3px 6px;display:flex;align-items:center;gap:5px;pointer-events:none}
+.badge i{width:7px;height:7px;border-radius:50%;background:var(--live)}
+.badge.replay i{background:var(--accent)}
+.badge.photo i{background:var(--muted)}
+.tools{position:absolute;right:8px;top:8px;z-index:2;display:flex;gap:6px}
+.tool{width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.55);
+  cursor:pointer;display:grid;place-items:center;font-size:14px;padding:0}
+.tool:hover{border-color:var(--accent)}
+.tool.fav.on{color:var(--fav);border-color:var(--fav)}
+
+.meta{display:flex;align-items:flex-end;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.meta .txt{flex:1;min-width:0}
+.name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zone{color:var(--muted);font-size:12px}
+.meta a{font-size:12px;white-space:nowrap}
+
+#empty{color:var(--muted);text-align:center;padding:48px 16px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 16px max(28px, env(safe-area-inset-bottom))}
+
+@media (max-width:640px){
+  .actions{flex-basis:100%}
+  #q{max-width:none}
+  #grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">
+      <h1>France Surf Cams</h1>
+      <p id="sub">Webcams surf</p>
+    </div>
+    <div class="actions">
+      <input id="q" type="search" placeholder="Chercher un spot…" autocomplete="off" aria-label="Chercher un spot">
+      <button class="btn" id="playVisible" title="Lancer toutes les vidéos de la zone affichée">Lancer visibles</button>
+      <button class="btn" id="autoBtn" title="Lancer automatiquement les vidéos à l'écran">Auto off</button>
+    </div>
+  </div>
+  <nav id="nav" aria-label="Zones"></nav>
+  <div id="count"></div>
+</header>
+
+<main>
+  <div id="grid"></div>
+  <div id="empty" hidden>Aucune caméra ici. Ajoute des favoris avec ★, ou change de zone.</div>
+</main>
+
+<footer>
+  Vidéos et images fournies par <a href="https://www.viewsurf.com/univers/surf" target="_blank" rel="noopener noreferrer">Viewsurf</a>
+  et la <a href="https://www.biarritz.fr/" target="_blank" rel="noopener noreferrer">ville de Biarritz</a>.
+  Une caméra noire la nuit ou en maintenance est hors ligne à la source.
+</footer>
+
+<script src="cams.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var PLAYER = "https://platforms5.joada.net/embeded/embeded.html";
+  var FAV_ZONE = "★ Favoris";
+  var CAMS = window.CAMS || [];
+  var ZONES = (window.ZONES || []).filter(function (z) { return CAMS.some(function (c) { return c.z === z; }); });
+  CAMS.forEach(function (c) { if (ZONES.indexOf(c.z) < 0) ZONES.push(c.z); });
+
+  // ── storage (may be unavailable: private mode, blocked site data, file://) ──
+  function load(k, d) { try { var v = localStorage.getItem("fsc_" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem("fsc_" + k, JSON.stringify(v)); } catch (e) {} }
+
+  var favs = load("favs", {});
+  var zone = load("zone", ZONES[0]);
+  var auto = load("auto", false);
+  var query = "";
+  if (zone !== FAV_ZONE && ZONES.indexOf(zone) < 0) zone = ZONES[0];
+
+  var grid = document.getElementById("grid"), nav = document.getElementById("nav"),
+      countEl = document.getElementById("count"), empty = document.getElementById("empty");
+
+  var videoCount = CAMS.filter(isVideo).length;
+  document.getElementById("sub").textContent =
+    CAMS.length + " caméras · " + videoCount + " en vidéo";
+
+  function isVideo(c) { return !!(c.uuid || c.pv); }
+  function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+
+  // ── zone pills ──
+  [FAV_ZONE].concat(ZONES).forEach(function (z) {
+    var b = document.createElement("button");
+    b.className = "pill"; b.dataset.z = z; b.textContent = z;
+    if (z !== FAV_ZONE) {
+      var n = document.createElement("small");
+      n.textContent = CAMS.filter(function (c) { return c.z === z; }).length;
+      b.appendChild(n);
+    }
+    b.addEventListener("click", function () {
+      zone = z; save("zone", z);
+      query = ""; document.getElementById("q").value = "";
+      render();
+      b.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+    nav.appendChild(b);
+  });
+
+  // ── cards ──
+  var PLAY_ICON = '<div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
+
+  var cards = CAMS.map(function (cam) {
+    var key = String(cam.id);
+    var el = document.createElement("div");
+    el.className = "card"; el.dataset.state = "idle";
+
+    var media = document.createElement("div");
+    media.className = "media";
+    var ov = document.createElement("div");
+    ov.className = "ov";
+    media.appendChild(ov);
+
+    var badge = document.createElement("span");
+    if (cam.t === "live") { badge.className = "badge"; badge.innerHTML = "<i></i>LIVE"; }
+    else if (isVideo(cam)) { badge.className = "badge replay"; badge.innerHTML = "<i></i>REPLAY"; }
+    else { badge.className = "badge photo"; badge.innerHTML = "<i></i>" + (cam.t === "pano" ? "PHOTO 360°" : "LIEN"); }
+    media.appendChild(badge);
+
+    var tools = document.createElement("div");
+    tools.className = "tools";
+    var fav = document.createElement("button");
+    fav.className = "tool fav" + (favs[key] ? " on" : "");
+    fav.textContent = "★"; fav.title = "Favori"; fav.setAttribute("aria-label", "Favori");
+    fav.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      if (favs[key]) delete favs[key]; else favs[key] = 1;
+      fav.classList.toggle("on", !!favs[key]);
+      save("favs", favs);
+      if (zone === FAV_ZONE && !query) render();
+    });
+    tools.appendChild(fav);
+
+    if (isVideo(cam)) {
+      var fs = document.createElement("button");
+      fs.className = "tool"; fs.textContent = "⛶"; fs.title = "Plein écran"; fs.setAttribute("aria-label", "Plein écran");
+      fs.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        if (el.dataset.state !== "playing") start(el);
+        var target = media.requestFullscreen ? media : media.querySelector("iframe");
+        if (target && target.requestFullscreen) target.requestFullscreen().catch(function () {});
+        else if (target && target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+      });
+      tools.appendChild(fs);
+    }
+    media.appendChild(tools);
+
+    var meta = document.createElement("div");
+    meta.className = "meta";
+    var txt = document.createElement("div");
+    txt.className = "txt";
+    var name = document.createElement("div"); name.className = "name"; name.textContent = cam.n; name.title = cam.n;
+    var zl = document.createElement("div"); zl.className = "zone"; zl.textContent = cam.z;
+    txt.appendChild(name); txt.appendChild(zl);
+    var link = document.createElement("a");
+    link.href = cam.page; link.target = "_blank"; link.rel = "noopener noreferrer";
+    link.textContent = "voir sur " + new URL(cam.page).hostname.replace(/^www\./, "");
+    meta.appendChild(txt); meta.appendChild(link);
+
+    el.appendChild(media); el.appendChild(meta);
+
+    var card = { el: el, cam: cam, key: key, media: media, ov: ov, search: norm(cam.n + " " + cam.z) };
+    el._card = card;
+    setIdle(card);
+
+    media.addEventListener("click", function () {
+      if (isVideo(cam)) start(el);
+      else window.open(cam.page, "_blank", "noopener");
+    });
+    return card;
+  });
+
+  // ── playback ──
+  function setIdle(c) {
+    if (isVideo(c.cam)) c.ov.innerHTML = PLAY_ICON + "<span>Lire</span>";
+    else if (c.cam.t === "pano") c.ov.innerHTML = '<span class="ico">🌅</span><span>Photo panoramique (toutes les 20 min)<br>Ouvrir sur Viewsurf ↗</span>';
+    else c.ov.innerHTML = '<span class="ico">📡</span><span>Lecteur non intégrable<br>Ouvrir sur Viewsurf ↗</span>';
+  }
+
+  function playerUrl(cam) {
+    if (cam.pv) return cam.pv;
+    return PLAYER + "?uuid=" + encodeURIComponent(cam.uuid) + "&type=" + encodeURIComponent(cam.t || "vod") +
+      "&liveicon=0&vsheader=1&tz=Europe/Paris";
+  }
+
+  function start(el) {
+    var c = el._card;
+    if (!isVideo(c.cam) || el.dataset.state !== "idle") return;
+    el.dataset.state = "loading";
+    c.ov.innerHTML = '<div class="spin"></div><span>Chargement…</span>';
+    var f = document.createElement("iframe");
+    f.src = playerUrl(c.cam);
+    f.title = c.cam.n;
+    f.allow = "autoplay; fullscreen; picture-in-picture";
+    f.setAttribute("allowfullscreen", "");
+    f.setAttribute("scrolling", "no");
+    f.addEventListener("load", function () { if (el.dataset.state === "loading") el.dataset.state = "playing"; });
+    c.media.insertBefore(f, c.media.firstChild);
+  }
+
+  function stop(el) {
+    var c = el._card;
+    var f = c.media.querySelector("iframe");
+    if (f) f.remove();
+    if (el.dataset.state !== "idle") { el.dataset.state = "idle"; setIdle(c); }
+  }
+
+  // Unload players that scroll well out of view; auto-start the ones coming in.
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      var el = en.target;
+      if (en.isIntersecting) { if (auto) start(el); }
+      else if (el.dataset.state !== "idle") stop(el);
+    });
+  }, { rootMargin: "300px 0px" });
+
+  // ── render ──
+  function render() {
+    Array.prototype.forEach.call(nav.children, function (b) {
+      b.classList.toggle("on", !query && b.dataset.z === zone);
+    });
+    var q = norm(query.trim());
+    io.disconnect();
+    grid.textContent = "";
+    var shown = 0;
+    cards.forEach(function (c) {
+      var visible = q ? c.search.indexOf(q) >= 0
+                      : (zone === FAV_ZONE ? !!favs[c.key] : c.cam.z === zone);
+      if (visible) { grid.appendChild(c.el); io.observe(c.el); shown++; }
+      else if (c.el.dataset.state !== "idle") stop(c.el);
+    });
+    empty.hidden = shown > 0;
+    countEl.textContent = q
+      ? shown + " résultat" + (shown > 1 ? "s" : "") + " pour « " + query.trim() + " »"
+      : shown + " caméra" + (shown > 1 ? "s" : "") + " · " + (zone === FAV_ZONE ? "favoris" : zone);
+  }
+
+  // ── controls ──
+  document.getElementById("q").addEventListener("input", function (e) { query = e.target.value; render(); });
+
+  document.getElementById("playVisible").addEventListener("click", function () {
+    Array.prototype.forEach.call(grid.children, start);
+  });
+
+  var autoBtn = document.getElementById("autoBtn");
+  function syncAuto() { autoBtn.classList.toggle("on", auto); autoBtn.textContent = auto ? "Auto on" : "Auto off"; }
+  autoBtn.addEventListener("click", function () {
+    auto = !auto; save("auto", auto); syncAuto();
+    if (auto) render(); // re-observe so on-screen cards start
+  });
+  syncAuto();
+
+  // Free everything when the tab goes to the background (battery + data).
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) Array.prototype.forEach.call(grid.children, stop);
+    else if (auto) render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
